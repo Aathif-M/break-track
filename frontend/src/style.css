@@ -1,0 +1,9 @@
+.input-1:focus-visible,
+.input-1:focus,
+input:active {
+  outline: none;
+}
+
+.card-inner {
+  background-color: rgb(252, 252, 252);
+}
