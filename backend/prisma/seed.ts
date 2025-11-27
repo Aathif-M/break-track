@@ -1,17 +1,20 @@
+import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 
 async function main() {
     // Create Super Admin
-    const hashedPassword = await bcrypt.hash('jd123', 10);
+    const hashedPassword = await bcrypt.hash('v123', 10);
     const admin = await prisma.user.upsert({
-        where: { email: 'thesecondjohndoe99@gmail.com' },
+        where: { email: 'veloura5610@gmail.com' },
         update: {},
         create: {
-            name: 'John Doe',
-            email: 'thesecondjohndoe99@gmail.com',
+            name: 'Veloura',
+            email: 'veloura5610@gmail.com',
             password: hashedPassword,
             role: 'SUPER_ADMIN',
         },
