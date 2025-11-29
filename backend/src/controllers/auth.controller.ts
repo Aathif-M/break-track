@@ -31,10 +31,13 @@ export const login = async (req: Request, res: Response) => {
             { expiresIn: '1d' }
         );
 
-        // Update user status to online
+        // Update user status to online and set lastLogin
         await prisma.user.update({
             where: { id: user.id },
-            data: { isOnline: true }
+            data: {
+                isOnline: true,
+                lastLogin: new Date()
+            }
         });
 
         res.json({
@@ -45,6 +48,7 @@ export const login = async (req: Request, res: Response) => {
                 email: user.email,
                 role: user.role,
                 isOnline: true,
+                lastLogin: new Date(),
                 mustChangePassword: user.mustChangePassword,
             },
         });

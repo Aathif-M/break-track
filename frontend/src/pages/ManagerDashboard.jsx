@@ -113,14 +113,21 @@ const DashboardContent = () => {
                                         </span>
                                     </td>
                                     <td className="p-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${activeSession
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : agent.isOnline
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {activeSession ? 'On-Break' : agent.isOnline ? 'Online' : 'Offline'}
-                                        </span>
+                                        <div className="flex flex-col items-start">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${activeSession
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : agent.isOnline
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {activeSession ? 'On-Break' : agent.isOnline ? 'Online' : 'Offline'}
+                                            </span>
+                                            {!agent.isOnline && !activeSession && agent.lastLogin && (
+                                                <span className="text-xs text-gray-500 mt-1">
+                                                    {new Date(agent.lastLogin).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="p-4 text-gray-600">{activeSession?.breakType?.name || '--'}</td>
                                     <td className="p-4 text-gray-600">

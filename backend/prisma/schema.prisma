@@ -34,6 +34,7 @@ model User {
   createdAgents User[] @relation("CreatedAgents") // For managers creating agents
   createdBy     User?  @relation("CreatedAgents", fields: [createdById], references: [id])
   createdById   Int?
+  lastLogin     DateTime?
 }
 
 model BreakType {
