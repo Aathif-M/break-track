@@ -182,6 +182,10 @@ const ManagerHistory = () => {
         title.textContent = 'Break History Report';
         title.style.textAlign = 'center';
         title.style.marginBottom = '10px';
+        title.style.fontSize = '28px';
+        title.style.color = '#1e3a8a';
+        title.style.fontWeight = '600';
+
         element.appendChild(title);
 
         // Export date
@@ -190,6 +194,7 @@ const ManagerHistory = () => {
         date.style.textAlign = 'center';
         date.style.color = '#666';
         date.style.marginBottom = '20px';
+        date.style.fontSize = '16px';
         element.appendChild(date);
 
         // Statistics Section
@@ -198,8 +203,8 @@ const ManagerHistory = () => {
         statsDiv.style.pageBreakInside = 'avoid';
         const statsTitle = document.createElement('h2');
         statsTitle.textContent = 'Summary Statistics';
-        statsTitle.style.fontSize = '16px';
-        statsTitle.style.borderBottom = '2px solid #333';
+        statsTitle.style.fontSize = '18px';
+        statsTitle.style.borderBottom = '2px solid #1e3a8a';
         statsTitle.style.paddingBottom = '10px';
         statsTitle.style.marginBottom = '10px';
         statsDiv.appendChild(statsTitle);
@@ -219,10 +224,10 @@ const ManagerHistory = () => {
 
         statItems.forEach(item => {
             const statBox = document.createElement('div');
-            statBox.style.border = '1px solid #ddd';
+            statBox.style.border = '1px solid #1e3a8a';
             statBox.style.padding = '10px';
             statBox.style.borderRadius = '5px';
-            statBox.style.backgroundColor = '#f9f9f9';
+            statBox.style.backgroundColor = '#eff3ffff';
 
             const label = document.createElement('p');
             label.textContent = item.label;
@@ -251,7 +256,7 @@ const ManagerHistory = () => {
         const filtersTitle = document.createElement('h2');
         filtersTitle.textContent = 'Filters Applied';
         filtersTitle.style.fontSize = '16px';
-        filtersTitle.style.borderBottom = '2px solid #333';
+        filtersTitle.style.borderBottom = '2px solid #1e3a8a';
         filtersTitle.style.paddingBottom = '10px';
         filtersTitle.style.marginBottom = '10px';
         filtersDiv.appendChild(filtersTitle);
@@ -270,8 +275,15 @@ const ManagerHistory = () => {
 
         filters.forEach(filter => {
             const li = document.createElement('li');
-            li.textContent = `${filter.name}: ${filter.value}`;
+            const span = document.createElement('span');
+            span.textContent = filter.value;
+            span.style.color = '#000';
+            span.style.fontWeight = '600';
+            span.style.marginLeft = '10px';
+            span.style.fontSize = '18px';
+            li.textContent = `${filter.name}: `;
             li.style.marginBottom = '5px';
+            li.appendChild(span);
             filtersList.appendChild(li);
         });
 
@@ -284,7 +296,7 @@ const ManagerHistory = () => {
         const tableTitle = document.createElement('h2');
         tableTitle.textContent = `Break Sessions (${filteredData.length} records)`;
         tableTitle.style.fontSize = '16px';
-        tableTitle.style.borderBottom = '2px solid #333';
+        tableTitle.style.borderBottom = '2px solid #1e3a8a';
         tableTitle.style.paddingBottom = '10px';
         tableTitle.style.marginBottom = '10px';
         tableDiv.appendChild(tableTitle);
@@ -298,7 +310,7 @@ const ManagerHistory = () => {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         headerRow.style.backgroundColor = '#f0f0f0';
-        headerRow.style.borderBottom = '2px solid #333';
+        headerRow.style.borderBottom = '2px solid #1e3a8a';
 
         const headers = ['Agent', 'Break Type', 'Start Time', 'End Time', 'Duration', 'Status', 'Violation'];
         headers.forEach(header => {
@@ -729,8 +741,8 @@ const ManagerHistory = () => {
                                             </td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-1 rounded text-xs ${session.status === 'ONGOING'
-                                                        ? 'bg-blue-100 text-blue-800'
-                                                        : 'bg-gray-100 text-gray-800'
+                                                    ? 'bg-blue-100 text-blue-800'
+                                                    : 'bg-gray-100 text-gray-800'
                                                     }`}>
                                                     {session.status}
                                                 </span>
