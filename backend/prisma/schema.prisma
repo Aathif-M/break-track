@@ -35,6 +35,7 @@ model User {
   createdBy     User?  @relation("CreatedAgents", fields: [createdById], references: [id])
   createdById   Int?
   lastLogin     DateTime?
+  allowedBreaks BreakType[] @relation("UserAllowedBreaks")
 }
 
 model BreakType {
@@ -46,6 +47,7 @@ model BreakType {
   updatedAt DateTime @updatedAt
 
   breakSessions BreakSession[]
+  allowedUsers  User[]       @relation("UserAllowedBreaks")
 }
 
 model BreakSession {

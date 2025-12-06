@@ -9,6 +9,7 @@ const ManagerBreaks = () => {
     const [isAddModalOpen, setisAddModalOpen] = useState(false);
     const [isEditModalOpen, setisEditModalOpen] = useState(false);
     const [formData, setFormData] = useState({ name: '', duration: 600 });
+    const [durationSplit, setDurationSplit] = useState({ minutes: 10, seconds: 0 });
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -30,14 +31,20 @@ const ManagerBreaks = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const totalSeconds = (parseInt(durationSplit.minutes) || 0) * 60 + (parseInt(durationSplit.seconds) || 0);
+            const dataToSubmit = { ...formData, duration: totalSeconds };
+
             if (editingId) {
-                await api.put(`/breaks/types/${editingId}`, formData);
+                await api.put(`/breaks/types/${editingId}`, dataToSubmit);
             } else {
-                await api.post('/breaks/types', formData);
+                await api.post('/breaks/types', dataToSubmit);
             }
             setisAddModalOpen(false);
             setisEditModalOpen(false);
+            setisAddModalOpen(false);
+            setisEditModalOpen(false);
             setFormData({ name: '', duration: 600 });
+            setDurationSplit({ minutes: 10, seconds: 0 });
             setEditingId(null);
             fetchBreaks();
         } catch (error) {
@@ -59,6 +66,10 @@ const ManagerBreaks = () => {
 
     const openEditModal = (breakType) => {
         setFormData({ name: breakType.name, duration: breakType.duration });
+        setDurationSplit({
+            minutes: Math.floor(breakType.duration / 60),
+            seconds: breakType.duration % 60
+        });
         setEditingId(breakType.id);
         setisEditModalOpen(true);
         setisAddModalOpen(false);
@@ -66,6 +77,7 @@ const ManagerBreaks = () => {
 
     const openAddModal = () => {
         setFormData({ name: '', duration: 600 });
+        setDurationSplit({ minutes: 10, seconds: 0 });
         setEditingId(null);
         setisAddModalOpen(true);
         setisEditModalOpen(false);
@@ -145,14 +157,32 @@ const ManagerBreaks = () => {
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration (seconds)</label>
-                        <input
-                            type="number"
-                            value={formData.duration}
-                            onChange={e => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                            required
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-500">Minutes</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={durationSplit.minutes}
+                                    onChange={e => setDurationSplit({ ...durationSplit, minutes: parseInt(e.target.value) })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-500">Seconds</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    value={durationSplit.seconds}
+                                    onChange={e => setDurationSplit({ ...durationSplit, seconds: parseInt(e.target.value) })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required
+                                />
+                            </div>
+                        </div>
                     </div>
                     <button
                         type="submit"
@@ -176,14 +206,32 @@ const ManagerBreaks = () => {
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration (seconds)</label>
-                        <input
-                            type="number"
-                            value={formData.duration}
-                            onChange={e => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                            required
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-500">Minutes</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={durationSplit.minutes}
+                                    onChange={e => setDurationSplit({ ...durationSplit, minutes: parseInt(e.target.value) })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-xs text-gray-500">Seconds</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="59"
+                                    value={durationSplit.seconds}
+                                    onChange={e => setDurationSplit({ ...durationSplit, seconds: parseInt(e.target.value) })}
+                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    required
+                                />
+                            </div>
+                        </div>
                     </div>
                     <button
                         type="submit"

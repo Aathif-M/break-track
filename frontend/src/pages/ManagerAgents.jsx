@@ -12,6 +12,8 @@ const ManagerAgents = () => {
     const [formData, setFormData] = useState({ name: '', email: '', role: 'AGENT' });
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [breakTypes, setBreakTypes] = useState([]);
+    const [selectedBreaks, setSelectedBreaks] = useState([]);
 
     useEffect(() => {
         fetchAgents();
@@ -19,8 +21,12 @@ const ManagerAgents = () => {
 
     const fetchAgents = async () => {
         try {
-            const res = await api.get('/users');
-            setAgents(res.data);
+            const [usersRes, breaksRes] = await Promise.all([
+                api.get('/users'),
+                api.get('/breaks/types')
+            ]);
+            setAgents(usersRes.data);
+            setBreakTypes(breaksRes.data);
             setLoading(false);
         } catch (error) {
             console.error(error);
@@ -32,12 +38,14 @@ const ManagerAgents = () => {
         e.preventDefault();
         try {
             if (editingId) {
-                await api.put(`/users/${editingId}`, formData);
+                await api.put(`/users/${editingId}`, { ...formData, assignedBreaks: selectedBreaks });
             } else {
-                await api.post('/users', formData);
+                await api.post('/users', { ...formData, assignedBreaks: selectedBreaks });
             }
             setIsModalOpen(false);
+            setIsModalOpen(false);
             setFormData({ name: '', email: '', role: 'AGENT' });
+            setSelectedBreaks([]);
             setEditingId(null);
             fetchAgents();
         } catch (error) {
@@ -71,12 +79,31 @@ const ManagerAgents = () => {
     const handleEdit = (agent) => {
         setFormData({ name: agent.name, email: agent.email, role: agent.role });
         setEditingId(agent.id);
+        // Pre-select breaks. If allowedBreaks is empty, user might have ALL or NONE. 
+        // Logic: if allowedBreaks has items, use them. If empty, check if legacy? 
+        // Requirement: Assign or retain break types. 
+        // If agent.allowedBreaks is undefined/empty, maybe default to ALL?
+        // But backend `getBreakTypes` defaults to ALL if empty.
+        // So for UI, if empty, we might want to select ALL to verify?
+        // Let's assume empty list from API means NO breaks assigned explicitly (which implied ALL in backend legac code, but my new code is strict IF allowedBreaks > 0).
+        // Wait, my backend logic: `if (user.allowedBreaks.length > 0) ... else return ALL`.
+        // So if I edit a user and they have 0 allowedBreaks, they have ALL breaks effective.
+        // So I should pre-select ALL breaks in UI to represent this state?
+        // Yes, showing "All Selected" is better UX than "None Selected" but actually having access to all.
+
+        if (agent.allowedBreaks && agent.allowedBreaks.length > 0) {
+            setSelectedBreaks(agent.allowedBreaks.map(b => b.id));
+        } else {
+            // Default to all active breaks if none explicitly assigned (Legacy support)
+            setSelectedBreaks(breakTypes.map(b => b.id));
+        }
         setIsModalOpen(true);
     };
 
     const openAddModal = () => {
         setFormData({ name: '', email: '', role: 'AGENT' });
         setEditingId(null);
+        setSelectedBreaks(breakTypes.map(b => b.id)); // Default to all breaks for new user
         setIsModalOpen(true);
     };
 
@@ -187,6 +214,43 @@ const ManagerAgents = () => {
                                 <option value="AGENT">Agent</option>
                                 <option value="MANAGER">Manager</option>
                             </select>
+                        </div>
+                    )}
+
+                    {formData.role === 'AGENT' && (
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Allowed Breaks</label>
+                            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                                {breakTypes.map(bt => {
+                                    const isSelected = selectedBreaks.includes(bt.id);
+                                    return (
+                                        <button
+                                            key={bt.id}
+                                            type="button"
+                                            onClick={() => {
+                                                if (isSelected) {
+                                                    setSelectedBreaks(selectedBreaks.filter(id => id !== bt.id));
+                                                } else {
+                                                    setSelectedBreaks([...selectedBreaks, bt.id]);
+                                                }
+                                            }}
+                                            className={`
+                                                px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border
+                                                ${isSelected
+                                                    ? 'bg-blue-600/90 text-white shadow-md backdrop-blur-sm border-blue-500 hover:bg-blue-600'
+                                                    : 'bg-gray-100/50 text-gray-500 border-gray-200 hover:bg-gray-200/80 hover:text-gray-700'
+                                                }
+                                            `}
+                                        >
+                                            {bt.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex justify-end mt-2 text-xs gap-3">
+                                <button type="button" onClick={() => setSelectedBreaks(breakTypes.map(b => b.id))} className="text-blue-600 hover:underline">Select All</button>
+                                <button type="button" onClick={() => setSelectedBreaks([])} className="text-gray-500 hover:underline">Deselect All</button>
+                            </div>
                         </div>
                     )}
 

@@ -50,10 +50,29 @@ export const updateBreakType = async (req: Request, res: Response) => {
 };
 
 
-export const getBreakTypes = async (req: Request, res: Response) => {
+export const getBreakTypes = async (req: AuthRequest, res: Response) => {
     try {
+        const { userId, userRole } = req;
+
+        let whereClause: any = { isActive: true };
+
+        // If user is AGENT, only show assigned breaks
+        // If agent has NO specific assignments, show ALL active breaks (legacy behavior)
+        if (userRole === 'AGENT') {
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: { allowedBreaks: true }
+            });
+
+            if (user?.allowedBreaks && user.allowedBreaks.length > 0) {
+                whereClause.id = {
+                    in: user.allowedBreaks.map(b => b.id)
+                };
+            }
+        }
+
         const breakTypes = await prisma.breakType.findMany({
-            where: { isActive: true }
+            where: whereClause
         });
         res.json(breakTypes);
     } catch (error) {
@@ -161,7 +180,7 @@ export const endBreak = async (req: AuthRequest, res: Response) => {
 
                 // Fetch all Managers and Super Admins
                 const managers = await prisma.user.findMany({
-                    where: { 
+                    where: {
                         role: { in: ['MANAGER', 'SUPER_ADMIN'] }
                     },
                     select: { email: true }

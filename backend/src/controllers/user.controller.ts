@@ -26,6 +26,9 @@ export const createUser = async (req: AuthRequest, res: Response) => {
                 role: role || 'AGENT',
                 mustChangePassword: true,
                 createdById: req.userId,
+                allowedBreaks: assignedBreaks ? {
+                    connect: assignedBreaks.map((id: number) => ({ id }))
+                } : undefined,
             },
         });
 
@@ -56,7 +59,8 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
                 },
                 createdBy: {
                     select: { name: true }
-                }
+                },
+                allowedBreaks: true
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -70,11 +74,18 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, email, role } = req.body;
+        const { name, email, role, assignedBreaks } = req.body;
 
         const user = await prisma.user.update({
             where: { id: parseInt(id) },
-            data: { name, email, role },
+            data: {
+                name,
+                email,
+                role,
+                allowedBreaks: assignedBreaks ? {
+                    set: assignedBreaks.map((id: number) => ({ id }))
+                } : undefined
+            },
         });
 
         res.json(user);
