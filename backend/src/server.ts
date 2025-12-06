@@ -35,7 +35,7 @@ app.use('/api/breaks', breakRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {
-  res.send('Work Pulse API is running');
+  res.send('WorkPulse API is running');
 });
 
 // Socket.IO connection

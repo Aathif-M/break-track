@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import metaLogoWhite from '../assets/meta-logo-white.png';
 
 const Layout = ({ children, navLinks }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,7 +15,7 @@ const Layout = ({ children, navLinks }) => {
         <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
             {/* Mobile Header */}
             <div className="md:hidden fixed top-0 left-0 right-0 bg-blue-900 text-white p-4 flex justify-between items-center z-30 shadow-md h-16">
-                <h1 className="text-xl font-bold">Work Pulse</h1>
+                <h1 className="text-xl font-bold">WorkPulse</h1>
                 <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1 focus:outline-none">
                     {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -34,7 +35,10 @@ const Layout = ({ children, navLinks }) => {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0
             `}>
-                <h1 className="text-2xl font-bold mb-8 hidden md:block">Work Pulse</h1>
+                <div className="pb-6 mb-3 hidden md:block border-b border-blue-800">
+                    <img src={metaLogoWhite} alt="WorkPulse Logo" className="h-16 mb-0" />
+                    <h1 className="text-2xl font-bold">WorkPulse</h1>
+                </div>
 
                 {/* Mobile Header Spacer */}
                 <div className="md:hidden h-10 mb-6 flex items-center">
