@@ -1,28 +1,26 @@
-import { PrismaClient } from '@prisma/client';
-import { sendViolationAlertEmail } from './email';
-
-const prisma = new PrismaClient();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.initScheduler = exports.scheduleSession = void 0;
+const client_1 = require("@prisma/client");
+const email_1 = require("./email");
+const prisma = new client_1.PrismaClient();
 // Map sessionId -> timeout
-const sessionTimers: Map<number, NodeJS.Timeout> = new Map();
-
-const scheduleSession = (session: any) => {
+const sessionTimers = new Map();
+const scheduleSession = (session) => {
     try {
-        if (!session || !session.id || !session.expectedEndTime) return;
-
+        if (!session || !session.id || !session.expectedEndTime)
+            return;
         const now = new Date();
         const expected = new Date(session.expectedEndTime);
         let ms = expected.getTime() - now.getTime();
-
         // If expected time already passed, run immediately (0ms)
-        if (ms < 0) ms = 0;
-
+        if (ms < 0)
+            ms = 0;
         // Clear existing timer if any
         if (sessionTimers.has(session.id)) {
-            clearTimeout(sessionTimers.get(session.id)!);
+            clearTimeout(sessionTimers.get(session.id));
             sessionTimers.delete(session.id);
         }
-
         const t = setTimeout(async () => {
             try {
                 // Re-fetch session to confirm status
@@ -30,9 +28,8 @@ const scheduleSession = (session: any) => {
                     where: { id: session.id },
                     include: { breakType: true }
                 });
-
-                if (!s) return;
-
+                if (!s)
+                    return;
                 // If still ongoing (not ended) and expectedEndTime reached, send alert
                 if (s.status === 'ONGOING' && (!s.endTime || new Date(s.endTime) > s.expectedEndTime)) {
                     // Fetch managers and super admins
@@ -40,29 +37,30 @@ const scheduleSession = (session: any) => {
                         where: { role: { in: ['MANAGER', 'SUPER_ADMIN'] } },
                         select: { email: true }
                     });
-                    const recipients = managers.map((m: { email: string }) => m.email).filter(Boolean);
-
+                    const recipients = managers.map((m) => m.email).filter(Boolean);
                     if (recipients.length > 0) {
-                        await sendViolationAlertEmail(recipients, {
+                        await (0, email_1.sendViolationAlertEmail)(recipients, {
                             agentName: (await prisma.user.findUnique({ where: { id: s.userId } }))?.name || 'Unknown',
                             breakType: s.breakType?.name || 'Unknown',
                             sessionId: s.id
                         });
                     }
                 }
-            } catch (e) {
+            }
+            catch (e) {
                 console.error('Error in scheduled violation check:', e);
-            } finally {
+            }
+            finally {
                 sessionTimers.delete(session.id);
             }
         }, ms);
-
         sessionTimers.set(session.id, t);
-    } catch (e) {
+    }
+    catch (e) {
         console.error('Failed to schedule session:', e);
     }
 };
-
+exports.scheduleSession = scheduleSession;
 const initScheduler = async () => {
     try {
         // Find all ongoing sessions with expectedEndTime in the future or past
@@ -70,12 +68,11 @@ const initScheduler = async () => {
             where: { status: 'ONGOING' },
             include: { breakType: true }
         });
-
-        sessions.forEach((s: any) => scheduleSession(s));
+        sessions.forEach((s) => scheduleSession(s));
         console.log(`Scheduled ${sessions.length} ongoing sessions for violation checks.`);
-    } catch (e) {
+    }
+    catch (e) {
         console.error('Failed to init violation scheduler:', e);
     }
 };
-
-export { scheduleSession, initScheduler };
+exports.initScheduler = initScheduler;
